@@ -1,0 +1,54 @@
+import jakarta.persistence.*;
+
+@Entity
+public class Student {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+    private String name;
+    private int age;
+
+    public Student() {}
+    public Student(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    // Getters & Setters
+}
+import org.hibernate.*;
+import org.hibernate.cfg.Configuration;
+import java.util.List;
+
+public class StudentCRUD {
+    public static void main(String[] args) {
+        SessionFactory factory = new Configuration().configure().buildSessionFactory();
+        Session session = factory.openSession();
+
+        Transaction tx = session.beginTransaction();
+
+        // CREATE
+        Student s1 = new Student("Rahul", 21);
+        session.save(s1);
+
+        // READ
+        Student fetched = session.get(Student.class, 1);
+        System.out.println("Fetched: " + fetched.getName());
+
+        // UPDATE
+        fetched.setAge(22);
+        session.update(fetched);
+
+        // DELETE
+        Student toDelete = session.get(Student.class, 2);
+        if (toDelete != null) session.delete(toDelete);
+
+        // LIST
+        List<Student> list = session.createQuery("from Student", Student.class).list();
+        list.forEach(s -> System.out.println(s.getId() + " " + s.getName()));
+
+        tx.commit();
+        session.close();
+        factory.close();
+    }
+}
